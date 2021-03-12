@@ -10,7 +10,7 @@ use byteorder::{ByteOrder, LittleEndian};
 
 use frame_support::{
   decl_error, decl_event, decl_module, decl_storage, ensure,
-  debug,
+  // debug,
   dispatch::{PaysFee, WeighData},
   traits::{Get, },
   weights::constants::WEIGHT_PER_MICROS,
@@ -151,7 +151,7 @@ decl_storage! {
     config(initial_pairs): Vec<(CurrencyId, CurrencyId, Option<Balance>, Option<Balance>)>;
 
     build(|config: &GenesisConfig| {
-            debug::info!("got config: {:?}", config.initial_pairs);
+            //debug::info!("got config: {:?}", config.initial_pairs);
       // config.initial_pairs.iter().for_each(|(currency_first, currency_second, balance_first, balance_second)| {
                 // let pair_id = Module::<T>::get_pair_key(currency_first, currency_second);
                 // LiquidityPool::insert(pair_id, (balance_first.unwrap_or(0), balance_second.unwrap_or(0)));
@@ -341,7 +341,7 @@ decl_module! {
           // should check the free shares before removing liquidity
           // remaining shares amount should >= locked shares amount
           let locked_shares = T::IncentiveOps::get_account_shares(&who, &currency_id_first, &currency_id_right);
-          debug::info!("new_shares: {:?}, locked_shares: {:?}", new_shares, locked_shares);
+          //debug::info!("new_shares: {:?}, locked_shares: {:?}", new_shares, locked_shares);
           if !locked_shares.is_zero() && locked_shares > new_shares {
             return Err(Error::<T>::ShareNotEnough.into());
           }
@@ -586,7 +586,7 @@ impl<T: Config> Module<T> {
     match (FromPrimitive::from_u32(left_id), FromPrimitive::from_u32(right_id)) {
       (Some(left), Some(right)) => Some((left, right)),
        _ => {
-         debug::warn!("invalid pair ids: {:?}", pair_key);
+         //debug::warn!("invalid pair ids: {:?}", pair_key);
          None
        },
     }
@@ -790,7 +790,7 @@ impl<T: Config> Module<T> {
         .map(|(_, pk, info)| (pk.clone(), info.clone()))
         .collect();
 
-      debug::info!("pool info: {:?}", pool_info);
+      //debug::info!("pool info: {:?}", pool_info);
 
       (currency_pairs, pool_info)
     }
@@ -850,7 +850,7 @@ impl<T: Config> Module<T> {
       &target_currency_id, &supply_currency_id,
       |currency| currency_map.get(&currency).unwrap_or(&vec![]).to_vec(), 6);
 
-    debug::info!("got {:?} routes for currency: {:?}, target: {:?}", routes.len(), supply_currency_id, target_currency_id);
+    //debug::info!("got {:?} routes for currency: {:?}, target: {:?}", routes.len(), supply_currency_id, target_currency_id);
 
     Self::best_route(&target_currency_id,
                      &routes, &pool_info,
@@ -892,7 +892,7 @@ impl<T: Config> Module<T> {
       &supply_currency_id, &target_currency_id,
       |currency| currency_map.get(&currency).unwrap_or(&vec![]).to_vec(), 6);
 
-    debug::info!("got {:?} routes for currency: {:?}, target: {:?}, routes: {:?}", routes.len(), supply_currency_id, target_currency_id, routes);
+    //debug::info!("got {:?} routes for currency: {:?}, target: {:?}, routes: {:?}", routes.len(), supply_currency_id, target_currency_id, routes);
 
     Self::best_route(&supply_currency_id,
                      &routes, &pool_info,
@@ -939,7 +939,7 @@ impl<T: Config> Module<T> {
         cur_currency = currency.clone();
       }
 
-      debug::info!("amount: {:?}, {:?}, route: {:?}", cur_amount, cur_currency, route);
+      //debug::info!("amount: {:?}, {:?}, route: {:?}", cur_amount, cur_currency, route);
       if cur_amount > 0 && is_better(best_amount, cur_amount) {
         best_route = Some(route.clone());
         best_amount = cur_amount;
@@ -960,7 +960,7 @@ impl<T: Config> Module<T> {
     // should check we have enough shares to add to the pool
     let pair_id = Self::get_pair_key(&currency_id_first, &currency_id_second);
     let total_shares = Self::shares(&pair_id, who);
-    debug::info!("add stake: totals shares: {:?}, locked shares: {:?}", total_shares, locked_shares);
+    //debug::info!("add stake: totals shares: {:?}, locked shares: {:?}", total_shares, locked_shares);
     ensure!(locked_shares <= total_shares, Error::<T>::ShareNotEnough);
     Ok(locked_shares)
   }

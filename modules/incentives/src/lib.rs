@@ -6,7 +6,7 @@
 
 use codec::{Decode, Encode};
 use frame_support::{
-  decl_module, decl_error, decl_storage, debug,
+  decl_module, decl_error, decl_storage,
 };
 use sp_runtime::{
   DispatchError,
@@ -61,7 +61,7 @@ decl_storage! {
     config(dex_rewards): Vec<(CurrencyId, CurrencyId, Balance)>;
 
     build(|config: &GenesisConfig| {
-      debug::info!("got incentives config: {:?}", config.dex_rewards);
+      //debug::info!("got incentives config: {:?}", config.dex_rewards);
       for (left, right, reward_per_block) in &config.dex_rewards {
         let pair_key = PairKey::try_from(*left, *right).unwrap();
         assert!(!reward_per_block.is_zero());

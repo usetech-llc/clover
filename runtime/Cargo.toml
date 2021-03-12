@@ -37,7 +37,7 @@ pallet-balances = {default-features = false, git = "https://github.com/paritytec
 pallet-collective = {default-features = false, git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }
 pallet-contracts = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1" , default-features = false }
 pallet-contracts-primitives = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1" , default-features = false }
-pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false }
+pallet-contracts-rpc-runtime-api = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1",  default-features = false }
 pallet-grandpa = {default-features = false, git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }
 pallet-im-online = { default-features = false, git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }
 pallet-indices = {default-features = false, git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }

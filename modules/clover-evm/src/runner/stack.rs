@@ -2,7 +2,7 @@ use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
 use sp_core::{U256, H256, H160};
 use sp_runtime::traits::UniqueSaturatedInto;
-use frame_support::{debug, ensure, traits::{Get, Currency}, storage::{StorageMap, StorageDoubleMap}};
+use frame_support::{ ensure, traits::{Get, Currency}, storage::{StorageMap, StorageDoubleMap}};
 use sha3::{Keccak256, Digest};
 use fp_evm::{ExecutionInfo, CallInfo, CreateInfo, Account, Log, Vicinity};
 use evm::ExitReason;
@@ -36,7 +36,7 @@ impl<T: Config> Runner<T> {
 		// Gas price check is skipped when performing a gas estimation.
 		let gas_price = match gas_price {
 			Some(gas_price) => {
-				debug::info!("gas price: {:?}, min gas price: {:?}", gas_price, T::FeeCalculator::min_gas_price());
+				//log::info!("gas price: {:?}, min gas price: {:?}", gas_price, T::FeeCalculator::min_gas_price());
 				ensure!(gas_price >= T::FeeCalculator::min_gas_price(), Error::<T>::GasPriceTooLow);
 				gas_price
 			},
@@ -70,7 +70,7 @@ impl<T: Config> Runner<T> {
 		let (reason, retv) = f(&mut executor);
 
 		let used_gas = U256::from(executor.used_gas());
-		let actual_fee = executor.fee(gas_price);		
+		let actual_fee = executor.fee(gas_price);
 
 		executor.deposit(source, total_fee.saturating_sub(actual_fee));
 
@@ -122,8 +122,8 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 		config: &evm::EvmConfig,
 	) -> Result<CallInfo, Self::Error> {
 
-		debug::info!("CLOVER EVM CALL [from: {:?}, to: {:?}, value: {}, gas_limit: {}, input: {:02x}]",
-					 source, target, value, gas_limit, input.as_hex());
+		//log::info!("CLOVER EVM CALL [from: {:?}, to: {:?}, value: {}, gas_limit: {}, input: {:02x}]",
+			//		 source, target, value, gas_limit, input.as_hex());
 
 		Self::execute(
 			source,
@@ -164,7 +164,7 @@ impl<T: Config> RunnerT<T> for Runner<T> {
 					evm::CreateScheme::Legacy { caller: source },
 				);
 
-				debug::info!("CLOVER EVM CREATE [deployer: {:?}, address: {:?}, code: {:02x}]", source, address, init.as_hex());
+				//log::debug!("CLOVER EVM CREATE [deployer: {:?}, address: {:?}, code: {:02x}]", source, address, init.as_hex());
 				AccountConnection::insert(address, source);
 
 				(executor.transact_create(
@@ -336,12 +336,12 @@ impl<'vicinity, T: Config> ApplyBackend for Backend<'vicinity, T> {
 					});
 
 					if let Some(code) = code {
-						debug::debug!(
-							target: "evm",
-							"Inserting code ({} bytes) at {:?}",
-							code.len(),
-							address
-						);
+					//	log::debug!(
+					//		target: "evm",
+					//		"Inserting code ({} bytes) at {:?}",
+					//		code.len(),
+					//		address
+					//	);
 						AccountCodes::insert(address, code);
 					}
 
@@ -351,21 +351,21 @@ impl<'vicinity, T: Config> ApplyBackend for Backend<'vicinity, T> {
 
 					for (index, value) in storage {
 						if value == H256::default() {
-							debug::debug!(
-								target: "evm",
-								"Removing storage for {:?} [index: {:?}]",
-								address,
-								index
-							);
+							//log::debug!(
+							//	target: "evm",
+							//	"Removing storage for {:?} [index: {:?}]",
+							//	address,
+							//	index
+							//);
 							AccountStorages::remove(address, index);
 						} else {
-							debug::debug!(
-								target: "evm",
-								"Updating storage for {:?} [index: {:?}, value: {:?}]",
-								address,
-								index,
-								value
-							);
+							//log::debug!(
+							//	target: "evm",
+							//	"Updating storage for {:?} [index: {:?}, value: {:?}]",
+							//	address,
+							//	index,
+							//	value
+							//);
 							AccountStorages::insert(address, index, value);
 						}
 					}
@@ -375,26 +375,26 @@ impl<'vicinity, T: Config> ApplyBackend for Backend<'vicinity, T> {
 					}
 				},
 				Apply::Delete { address } => {
-					debug::debug!(
-						target: "evm",
-						"Deleting account at {:?}",
-						address
-					);
+					//log::debug!(
+					//	target: "evm",
+					//	"Deleting account at {:?}",
+					//	address
+					//);
 					Module::<T>::remove_account(&address)
 				},
 			}
 		}
 
 		for log in logs {
-			debug::trace!(
-				target: "evm",
-				"Inserting log for {:?}, topics ({}) {:?}, data ({}): {:?}]",
-				log.address,
-				log.topics.len(),
-				log.topics,
-				log.data.len(),
-				log.data
-			);
+			//log::trace!(
+			//	target: "evm",
+			//	"Inserting log for {:?}, topics ({}) {:?}, data ({}): {:?}]",
+			//	log.address,
+			//	log.topics.len(),
+			//	log.topics,
+			//	log.data.len(),
+			//	log.data
+			//);
 			Module::<T>::deposit_event(Event::<T>::Log(Log {
 				address: log.address,
 				topics: log.topics,

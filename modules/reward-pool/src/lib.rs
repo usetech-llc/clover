@@ -9,7 +9,7 @@
 use codec::{Decode, Encode, FullCodec, HasCompact};
 use frame_support::{
   decl_error, decl_event, decl_module, decl_storage, Parameter,
-  debug,
+  //debug,
   traits::{Get},
 };
 use sp_runtime::{
@@ -179,13 +179,13 @@ impl<T: Config> Module<T> {
 
     // should not happen, but it's nice to have a check
     if reward > total_rewards_useable || new_balance > borrowed_amount {
-      debug::error!("got wrong reward for account: {:?}, pool info: {:?}, shares: {:?}", account_info, pool_info, amount);
+      //log::error!("got wrong reward for account: {:?}, pool info: {:?}, shares: {:?}", account_info, pool_info, amount);
       return Err(Error::<T>::RewardCaculationError.into());
     }
     let total_shares = total_shares.checked_sub(amount)
       .ok_or(Error::<T>::InsufficientShares)?;
     let (reward, total_rewards, total_rewards_useable) = if reward <= T::ExistentialReward::get() {
-      debug::warn!("reward {:?} is less than existential reward, don't send the reward", reward);
+      //log::warn!("reward {:?} is less than existential reward, don't send the reward", reward);
       (0, total_rewards, total_rewards_useable)
     } else {
       let rewards = total_rewards.checked_sub(reward_with_virtual)
@@ -233,7 +233,7 @@ impl<T: Config> Module<T> {
 
     // should not happen, but it's nice to have a check
     if &reward_with_virtual > total_rewards {
-      debug::error!("got wrong reward for pool info: {:?}, shares: {:?}", pool_info, amount);
+      //debug::error!("got wrong reward for pool info: {:?}, shares: {:?}", pool_info, amount);
       return Err(Error::<T>::RewardCaculationError.into());
     }
 
@@ -247,7 +247,7 @@ impl<T: Config> Module<T> {
 
     if !balance_change.is_zero() {
       let sub_account = Self::sub_account_id(pool.clone());
-      debug::info!("updating reward pool {:?}, account {:?} balance by: {:?}", pool, sub_account, balance_change);
+      //debug::info!("updating reward pool {:?}, account {:?} balance by: {:?}", pool, sub_account, balance_change);
 
       let amount = balance_change.unique_saturated_into();
       T::Currency::update_balance(T::GetNativeCurrencyId::get(), &sub_account, amount)?;
@@ -275,7 +275,7 @@ impl<T: Config> Module<T> {
   ) -> Result<(PoolInfo<Share, Balance, T::BlockNumber>, Balance), DispatchError> {
     let last_update_block  = pool_info.last_update_block;
     if cur_block <= &last_update_block {
-      debug::info!("ignore update pool reward: {:?} at block: {:?}, already updated at: {:?}", pool, cur_block, last_update_block);
+      //debug::info!("ignore update pool reward: {:?} at block: {:?}, already updated at: {:?}", pool, cur_block, last_update_block);
 
       return Ok((pool_info.clone(), 0));
     }
@@ -288,7 +288,7 @@ impl<T: Config> Module<T> {
     // reward is zero, this is a valid case
     // it's not necessary to update the storage in this case
     if reward == 0 {
-      debug::warn!("0 reward: {:?}, pool: {:?}, between {:?} - {:?}", reward, pool, last_update_block, cur_block);
+      //debug::warn!("0 reward: {:?}, pool: {:?}, between {:?} - {:?}", reward, pool, last_update_block, cur_block);
       return Ok((new_info, 0));
     }
 
@@ -354,7 +354,7 @@ impl<T: Config> RewardPoolOps<T::AccountId, T::PoolId, Share, Balance> for Modul
     let pool_info = Self::update_pool_reward(&pool)?;
     let account_info = <Module<T>>::pool_account_data(&pool, &who);
     // don't have sufficient shares
-    debug::info!("to remove shares: {:?}, amount: {:?}", account_info.shares, amount);
+    //debug::info!("to remove shares: {:?}, amount: {:?}", account_info.shares, amount);
     if account_info.shares < amount {
       return Err(Error::<T>::InsufficientShares.into());
     }
@@ -399,7 +399,7 @@ impl<T: Config> RewardPoolOps<T::AccountId, T::PoolId, Share, Balance> for Modul
     match calc_reward() {
       Ok(reward) => reward,
       Err(e) => {
-        debug::error!("failed to calculate reward for account: {:?}, pool: {:?}, error: {:?}", who, pool, e);
+        //debug::error!("failed to calculate reward for account: {:?}, pool: {:?}, error: {:?}", who, pool, e);
         Zero::zero()
       }
     }
@@ -458,7 +458,7 @@ impl<T: Config> RewardPoolOps<T::AccountId, T::PoolId, Share, Balance> for Modul
         match result {
           Ok((new_info, _)) => (pool_id, new_info.total_shares, new_info.total_rewards_useable),
           Err(e) => {
-            debug::error!("failed to get pool info for {:?}, error: {:?}", pool_id, e);
+            //debug::error!("failed to get pool info for {:?}, error: {:?}", pool_id, e);
             (pool_id, info.total_shares, Zero::zero())
           },
         }

@@ -28,7 +28,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 
 pallet-contracts = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1" , default-features = false }
-pallet-contracts-rpc = { version = "0.8.0" }
+pallet-contracts-rpc = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1",  default-features = false }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }
 sc-cli = { git = "https://github.com/paritytech/substrate.git",  branch = "rococo-v1"  }

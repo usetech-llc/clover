@@ -6,7 +6,6 @@ use crate::{ExitError, Stack, ExternalOpcode, Opcode, Capture, Handler, Transfer
 			Context, CreateScheme, Runtime, ExitReason, ExitSucceed, EvmConfig};
 use crate::backend::{InternalTransaction, Log, Basic, Apply, Backend};
 use crate::gasometer::{self, Gasometer};
-use frame_support::{debug};
 
 /// Account definition for the stack-based executor.
 #[derive(Default, Clone, Debug, Eq, PartialEq)]
@@ -283,7 +282,7 @@ impl<'backend, 'config, B: Backend> StackExecutor<'backend, 'config, B> {
 	pub fn deconstruct(
 		mut self
 	) -> (impl IntoIterator<Item=Apply<impl IntoIterator<Item=(H256, H256)>>>,
-		  impl IntoIterator<Item=Log>, 
+		  impl IntoIterator<Item=Log>,
 		  impl IntoIterator<Item=InternalTransaction>)
 	{
 		assert_eq!(self.substates.len(), 1);
@@ -697,7 +696,7 @@ impl<'backend, 'config, B: Backend> StackExecutor<'backend, 'config, B> {
 			developer_reward: None
 		};
 
-		debug::info!("========================EVM INTERNAL CALL [caller: {}, address: {}, used_gas: {}]",
+		log::debug!(target: "evm", "========================EVM INTERNAL CALL [caller: {}, address: {}, used_gas: {}]",
 			logcall.parent, logcall.node, logcall.gas_used);
 
 		self.call_graph.push(logcall);
@@ -913,7 +912,7 @@ impl<'backend, 'config, B: Backend> Handler for StackExecutor<'backend, 'config,
 			.expect("substate vec always have length greater than one; qed")
 			.gasometer
 			.gas();
-		debug::info!("========================EVM CHECK GAS [before: {}]", gas);
+		log::info!(target: "evm", "========================EVM CHECK GAS [before: {}]", gas);
 		res
 	}
 
