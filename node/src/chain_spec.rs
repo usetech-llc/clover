@@ -253,44 +253,44 @@ fn testnet_genesis(
   const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
 
   GenesisConfig {
-    frame_system: Some(SystemConfig {
+    frame_system: SystemConfig {
       // Add Wasm runtime to storage.
       code: wasm_binary.to_vec(),
       changes_trie_config: Default::default(),
-    }),
-    pallet_balances: Some(BalancesConfig {
+    },
+    pallet_balances: BalancesConfig {
       // Configure endowed accounts with initial balance of 1 << 60.
       balances: endowed_accounts.iter().cloned()
             .map(|k| (k, ENDOWMENT))
             .collect(),
-    }),
-    pallet_contracts: Some(ContractsConfig {
+    },
+    pallet_contracts: ContractsConfig {
       current_schedule: pallet_contracts::Schedule {
         enable_println, // this should only be enabled on development chains
         ..Default::default()
       },
-    }),
-    clover_evm: Some(EVMConfig {
+    },
+    clover_evm: EVMConfig {
       accounts: endowed_eth_accounts,
-    }),
-    clover_ethereum: Some(EthereumConfig {}),
-    pallet_indices: Some(IndicesConfig {
+    },
+    clover_ethereum: EthereumConfig {},
+    pallet_indices: IndicesConfig {
       indices: vec![],
-    }),
-    pallet_sudo: Some(SudoConfig {
+    },
+    pallet_sudo: SudoConfig {
       // Assign network admin rights.
       key: root_key,
-    }),
-    parachain_info: Some(clover_runtime::ParachainInfoConfig { parachain_id: id }),
-    orml_oracle_Instance1: Some(CloverOracleConfig {
+    },
+    parachain_info: clover_runtime::ParachainInfoConfig { parachain_id: id },
+    orml_oracle_Instance1: CloverOracleConfig {
       members: Default::default(), // initialized by OperatorMembership
       phantom: Default::default(),
-    }),
-    orml_oracle_Instance2: Some(BandOracleConfig {
+    },
+    orml_oracle_Instance2: BandOracleConfig {
       members: Default::default(), // initialized by OperatorMembership
       phantom: Default::default(),
-    }),
-      orml_tokens: Some(TokensConfig {
+    },
+      orml_tokens: TokensConfig {
       endowed_accounts: endowed_accounts
         .iter()
         .flat_map(|x| {
@@ -301,26 +301,26 @@ fn testnet_genesis(
           ]
         })
         .collect(),
-    }),
-    clover_incentives: Some(IncentivesConfig{
+    },
+    clover_incentives: IncentivesConfig{
       dex_rewards: vec![
         (CurrencyId::CLV, CurrencyId::DOT, 1 * DOLLARS),
         (CurrencyId::CLV, CurrencyId::CUSDT, 2 * DOLLARS),
         (CurrencyId::CETH, CurrencyId::CUSDT, 3 * DOLLARS),
       ],
-    }),
-    cloverdex: Some(CloverDexConfig {
+    },
+    cloverdex: CloverDexConfig {
         initial_pairs: vec![
           (CurrencyId::CUSDT, CurrencyId::CETH, Some(1000 * DOLLARS), Some(500 * DOLLARS)),
           (CurrencyId::CUSDT, CurrencyId::DOT, Some(700 * DOLLARS), Some(250 * DOLLARS)),
           (CurrencyId::CUSDT, CurrencyId::CLV, Some(300 * DOLLARS), Some(600 * DOLLARS)),
         ],
-    }),
-    pallet_collective_Instance1: Some(Default::default()),
-    pallet_collective_Instance2: Some(Default::default()),
-    pallet_democracy: Some(Default::default()),
-    pallet_treasury: Some(Default::default()),
-    pallet_elections_phragmen: Some(Default::default()),
-    pallet_membership_Instance1: Some(Default::default()),
+    },
+    pallet_collective_Instance1: Default::default(),
+    pallet_collective_Instance2: Default::default(),
+    pallet_democracy: Default::default(),
+    pallet_treasury: Default::default(),
+    pallet_elections_phragmen: Default::default(),
+    pallet_membership_Instance1: Default::default(),
   }
 }

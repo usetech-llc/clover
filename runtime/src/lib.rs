@@ -951,6 +951,8 @@ impl cumulus_pallet_xcm_handler::Config for Runtime {
   type XcmExecutor = XcmExecutor<XcmConfig>;
   type UpwardMessageSender = ParachainSystem;
   type HrmpMessageSender = ParachainSystem;
+  type SendXcmOrigin = EnsureRoot<AccountId>;
+  type AccountIdConverter = LocationConverter;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
