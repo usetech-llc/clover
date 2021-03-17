@@ -254,6 +254,7 @@ pub fn new_full_base(mut config: Configuration,
     partial_rpc_extensions_builder(deny_unsafe, subscription_executor, network_clone.clone())
   };
 
+  println!("starting mapping sync worker");
   task_manager.spawn_essential_handle().spawn(
 		"frontier-mapping-sync-worker",
 		MappingSyncWorker::new(
