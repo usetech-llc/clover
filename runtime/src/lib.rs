@@ -962,57 +962,57 @@ construct_runtime!(
     NodeBlock = opaque::Block,
     UncheckedExtrinsic = UncheckedExtrinsic
   {
-    System: frame_system::{Module, Call, Config, Storage, Event<T>},
-    RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
-    Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
+    System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+    RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage},
+    Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 
-    Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
-    Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+    Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
+    Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 
-    ParachainSystem: cumulus_pallet_parachain_system::{Module, Call, Storage, Inherent, Event},
+    ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Storage, Inherent, Event},
 
-    TransactionPayment: pallet_transaction_payment::{Module, Storage},
+    TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
 
-    ParachainInfo: parachain_info::{Module, Storage, Config},
-    XcmHandler: cumulus_pallet_xcm_handler::{Module, Event<T>, Origin},
+    ParachainInfo: parachain_info::{Pallet, Storage, Config},
+    XcmHandler: cumulus_pallet_xcm_handler::{Pallet, Event<T>, Origin},
 
-    Currencies: orml_currencies::{Module, Call, Event<T>},
-    Tokens: orml_tokens::{Module, Storage, Event<T>, Config<T>},
+    Currencies: orml_currencies::{Pallet, Call, Event<T>},
+    Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 
     // Governance.
-    Democracy: pallet_democracy::{Module, Call, Storage, Config, Event<T>},
-    Council: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-    TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-    ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>, Config<T>},
+    Democracy: pallet_democracy::{Pallet, Call, Storage, Config, Event<T>},
+    Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+    TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+    ElectionsPhragmen: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>},
     //ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>},
-    TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-    Treasury: pallet_treasury::{Module, Call, Storage, Event<T>, Config},
+    TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
+    Treasury: pallet_treasury::{Pallet, Call, Storage, Event<T>, Config},
 
     // Clover module
-    CloverDex: cloverdex::{Module, Storage, Call, Event<T>, Config},
-    RewardPool: reward_pool::{Module, Storage, Call, Event<T>,},
-    Incentives: clover_incentives::{Module, Storage, Call, Config},
-    Prices: clover_prices::{Module, Storage, Call, Event},
-    Loans: clover_loans::{Module, Storage, Call, Event<T>},
+    CloverDex: cloverdex::{Pallet, Storage, Call, Event<T>, Config},
+    RewardPool: reward_pool::{Pallet, Storage, Call, Event<T>,},
+    Incentives: clover_incentives::{Pallet, Storage, Call, Config},
+    Prices: clover_prices::{Pallet, Storage, Call, Event},
+    Loans: clover_loans::{Pallet, Storage, Call, Event<T>},
 
     // oracle
-    CloverOracle: orml_oracle::<Instance1>::{Module, Storage, Call, Config<T>, Event<T>},
-    BandOracle: orml_oracle::<Instance2>::{Module, Storage, Call, Config<T>, Event<T>},
+    CloverOracle: orml_oracle::<Instance1>::{Pallet, Storage, Call, Config<T>, Event<T>},
+    BandOracle: orml_oracle::<Instance2>::{Pallet, Storage, Call, Config<T>, Event<T>},
 
     // Smart contracts modules
-    Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>},
-    EVM: clover_evm::{Module, Config, Call, Storage, Event<T>},
-    Ethereum: clover_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
+    Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
+    EVM: clover_evm::{Pallet, Config, Call, Storage, Event<T>},
+    Ethereum: clover_ethereum::{Pallet, Call, Storage, Event, Config, ValidateUnsigned},
 
-    Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
+    Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 
     // Utility module.
-    Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
-    Utility: pallet_utility::{Module, Call, Event},
+    Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+    Utility: pallet_utility::{Pallet, Call, Event},
 
     // account module
-    EvmAccounts: evm_accounts::{Module, Call, Storage, Event<T>},
-    EVMBridge: evm_bridge::{Module},
+    EvmAccounts: evm_accounts::{Pallet, Call, Storage, Event<T>},
+    EVMBridge: evm_bridge::{Pallet},
   }
 );
 
@@ -1093,7 +1093,7 @@ impl_runtime_apis! {
     }
 
     fn random_seed() -> <Block as BlockT>::Hash {
-      RandomnessCollectiveFlip::random_seed()
+      RandomnessCollectiveFlip::random_seed().0
     }
   }
 

@@ -17,11 +17,11 @@ use polkadot_primitives::v0::CollatorPair;
 use clover_runtime::{self, opaque::Block, RuntimeApi};
 use sp_core::Pair;
 use sc_service::{error::Error as ServiceError, Configuration, Role, TaskManager, TFullClient,};
+use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
 use sp_runtime::traits::BlakeTwo256;
 use sp_trie::PrefixedMemoryDB;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sc_telemetry::TelemetrySpan;
 use fc_consensus::FrontierBlockImport;
 
 // Our native executor instance.
@@ -52,13 +52,33 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
     (),
     sp_consensus::import_queue::BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
     sc_transaction_pool::FullPool<Block, FullClient>,
-    FrontierBlockImport<Block, Arc<FullClient>, FullClient>,
+    (FrontierBlockImport<Block, Arc<FullClient>, FullClient>, Option<Telemetry>, Option<TelemetryWorkerHandle>),
 >, ServiceError> {
   let inherent_data_providers = build_inherent_data_providers()?;
 
+  let telemetry = config.telemetry_endpoints.clone()
+		.filter(|x| !x.is_empty())
+		.map(|endpoints| -> Result<_, sc_telemetry::Error> {
+			let worker = TelemetryWorker::new(16)?;
+			let telemetry = worker.handle().new_telemetry(endpoints);
+			Ok((worker, telemetry))
+		})
+		.transpose()?;
+
   let (client, backend, keystore_container, task_manager) =
-    sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)?;
+    sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config,
+      telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()))?;
   let client = Arc::new(client);
+
+  let telemetry_worker_handle = telemetry
+    .as_ref()
+    .map(|(worker, _)| worker.handle());
+
+  let telemetry = telemetry
+    .map(|(worker, telemetry)| {
+      task_manager.spawn_handle().spawn("telemetry", worker.run());
+      telemetry
+    });
 
   let registry = config.prometheus_registry();
 
@@ -86,7 +106,7 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
     select_chain: (),
     import_queue, transaction_pool,
     inherent_data_providers,
-    other: frontier_block_import,
+    other: (frontier_block_import, telemetry, telemetry_worker_handle),
   })
 }
 
@@ -114,15 +134,20 @@ where
 
   let parachain_config = prepare_node_config(parachain_config);
 
+  let params = new_partial(&parachain_config)?;
+
+  let (block_import, mut telemetry, telemetry_worker_handle) = params.other;
+
   let polkadot_full_node =
-    cumulus_client_service::build_polkadot_full_node(polkadot_config, collator_key.public()).map_err(
+    cumulus_client_service::build_polkadot_full_node(
+      polkadot_config,
+      collator_key.clone(),
+      telemetry_worker_handle).map_err(
       |e| match e {
         polkadot_service::Error::Sub(x) => x,
         s => format!("{}", s).into(),
       },
     )?;
-
-  let params = new_partial(&parachain_config)?;
 
   let client = params.client.clone();
   let backend = params.backend.clone();
@@ -137,7 +162,7 @@ where
   let transaction_pool = params.transaction_pool.clone();
   let mut task_manager = params.task_manager;
   let import_queue = params.import_queue;
-  let block_import = params.other;
+
   let (network, network_status_sinks, system_rpc_tx, start_network) =
     sc_service::build_network(sc_service::BuildNetworkParams {
       config: &parachain_config,
@@ -174,9 +199,6 @@ where
     })
   };
 
-  let telemetry_span = TelemetrySpan::new();
-	let _telemetry_span_entered = telemetry_span.enter();
-
   sc_service::spawn_tasks(sc_service::SpawnTasksParams {
     on_demand: None,
     remote_blockchain: None,
@@ -190,12 +212,12 @@ where
     network: network.clone(),
     network_status_sinks,
     system_rpc_tx,
-    telemetry_span: Some(telemetry_span.clone()),
+    telemetry: telemetry.as_mut(),
   })?;
 
   let announce_block = {
     let network = network.clone();
-    Arc::new(move |hash, data| network.announce_block(hash, Some(data)))
+    Arc::new(move |hash, data| network.announce_block(hash, data))
   };
 
   if validator {
@@ -204,6 +226,7 @@ where
 			client.clone(),
 			transaction_pool,
 			prometheus_registry.as_ref(),
+      telemetry.as_ref().map(|x| x.handle()),
 		);
 
     let spawner = task_manager.spawn_handle();
